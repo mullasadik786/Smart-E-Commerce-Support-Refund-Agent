@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, ScenarioPreset, OrderRecord, ShippingRecord } from '../types';
 import { SCENARIO_PRESETS } from '../mockData';
 import { ToolCallBadge } from './ToolCallBadge';
-import { Send, Bot, User, Lock, Sparkles, RefreshCw, ChevronRight, Package, ArrowRight } from 'lucide-react';
+import { RecentSearchesSidebar, RecentSearchEntry } from './RecentSearchesSidebar';
+import { Send, Bot, User, Lock, Sparkles, RefreshCw, ChevronRight, Package } from 'lucide-react';
 
 interface ChatViewProps {
   messages: ChatMessage[];
@@ -14,6 +15,12 @@ interface ChatViewProps {
   currentShipping: ShippingRecord | null;
   onOpenApprovalModal: (approval: any) => void;
   onClearChat: () => void;
+  recentSearches: RecentSearchEntry[];
+  orders: OrderRecord[];
+  shippingMap: Record<string, ShippingRecord>;
+  onSelectRecentOrder: (orderId: string, customPrompt?: string) => void;
+  onClearRecentSearches: () => void;
+  onManualSearchOrder: (orderId: string) => void;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({
@@ -26,6 +33,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
   currentShipping,
   onOpenApprovalModal,
   onClearChat,
+  recentSearches,
+  orders,
+  shippingMap,
+  onSelectRecentOrder,
+  onClearRecentSearches,
+  onManualSearchOrder,
 }) => {
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -251,8 +264,20 @@ export const ChatView: React.FC<ChatViewProps> = ({
         </div>
       </div>
 
-      {/* Right Sidebar: Active Order & Carrier Context (4 Cols) */}
+      {/* Right Sidebar: Recent Searches & Active Order Dossier (4 Cols) */}
       <div className="lg:col-span-4 space-y-4">
+        {/* Recent Searches Sidebar Panel */}
+        <RecentSearchesSidebar
+          recentSearches={recentSearches}
+          orders={orders}
+          shippingMap={shippingMap}
+          currentOrderId={currentOrder?.order_id || null}
+          onSelectOrder={onSelectRecentOrder}
+          onClearRecent={onClearRecentSearches}
+          onManualSearch={onManualSearchOrder}
+          isLoading={isLoading}
+        />
+
         {/* Scenario description card */}
         {activeScenario && (
           <div className="bg-[#FFFFFF] border-2 border-[#141414] p-4 shadow-[4px_4px_0px_#141414] space-y-2.5">

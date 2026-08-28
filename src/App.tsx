@@ -6,6 +6,7 @@ import { StateInspectorView } from './components/StateInspectorView';
 import { SandboxView } from './components/SandboxView';
 import { PolicyRulesView } from './components/PolicyRulesView';
 import { ApprovalModal } from './components/ApprovalModal';
+import { RecentSearchEntry } from './components/RecentSearchesSidebar';
 import {
   ChatMessage,
   OrderRecord,
@@ -16,6 +17,14 @@ import {
   ScenarioPreset,
 } from './types';
 import { INITIAL_ORDERS, INITIAL_SHIPPING, DEFAULT_INITIAL_STATE, SCENARIO_PRESETS } from './mockData';
+
+const DEFAULT_RECENT_SEARCHES: RecentSearchEntry[] = [
+  { orderId: 'ORD-7734', timestamp: 'Just now' },
+  { orderId: 'ORD-8921', timestamp: '5m ago' },
+  { orderId: 'ORD-4512', timestamp: '15m ago' },
+  { orderId: 'ORD-3390', timestamp: '45m ago' },
+  { orderId: 'ORD-5521', timestamp: '2h ago' },
+];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'chat' | 'approvals' | 'state' | 'sandbox' | 'policy'>('chat');
@@ -30,6 +39,44 @@ export default function App() {
   const [currentOrderId, setCurrentOrderId] = useState<string | null>('ORD-7734');
   const [activeScenario, setActiveScenario] = useState<ScenarioPreset | null>(SCENARIO_PRESETS[0]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Recent Searches Sidebar State
+  const [recentSearches, setRecentSearches] = useState<RecentSearchEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('recent_searched_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, 5);
+      }
+    } catch (e) {
+      console.warn('Could not read recent searches from localStorage:', e);
+    }
+    return DEFAULT_RECENT_SEARCHES;
+  });
+
+  const addRecentSearch = (orderId: string) => {
+    if (!orderId) return;
+    const cleanId = orderId.trim().toUpperCase();
+    setRecentSearches((prev) => {
+      const filtered = prev.filter((item) => item.orderId !== cleanId);
+      const updated = [{ orderId: cleanId, timestamp: 'Just now' }, ...filtered].slice(0, 5);
+      try {
+        localStorage.setItem('recent_searched_orders', JSON.stringify(updated));
+      } catch (e) {
+        console.warn('Could not persist recent searches:', e);
+      }
+      return updated;
+    });
+  };
+
+  const handleClearRecentSearches = () => {
+    setRecentSearches([]);
+    try {
+      localStorage.removeItem('recent_searched_orders');
+    } catch (e) {
+      console.warn('Could not clear recent searches in localStorage:', e);
+    }
+  };
   
   // Modal for Human Authorization
   const [modalApproval, setModalApproval] = useState<ApprovalRequestPayload | null>(null);
@@ -68,6 +115,14 @@ export default function App() {
 
   // Handle Customer Message Sending
   const handleSendMessage = async (text: string) => {
+    // Detect Order ID in message to update recent search
+    const orderMatch = text.match(/ORD-\d{4}/i);
+    if (orderMatch) {
+      const detectedId = orderMatch[0].toUpperCase();
+      addRecentSearch(detectedId);
+      setCurrentOrderId(detectedId);
+    }
+
     const userMsgId = `user_${Date.now()}`;
     const newMsg: ChatMessage = {
       id: userMsgId,
@@ -115,6 +170,10 @@ export default function App() {
           ...prev,
           ...data.stateUpdates,
         }));
+        if (data.stateUpdates.order_id) {
+          addRecentSearch(data.stateUpdates.order_id);
+          setCurrentOrderId(data.stateUpdates.order_id);
+        }
       }
 
       // If Pause State triggered for Human Approval
@@ -147,6 +206,7 @@ export default function App() {
   const handleSelectScenario = (scenario: ScenarioPreset) => {
     setActiveScenario(scenario);
     setCurrentOrderId(scenario.orderId);
+    addRecentSearch(scenario.orderId);
     setAgentState({
       ...DEFAULT_INITIAL_STATE,
       order_id: scenario.orderId,
@@ -155,6 +215,20 @@ export default function App() {
 
     // Add user question automatically for the scenario
     handleSendMessage(scenario.initialPrompt);
+  };
+
+  // Handle Manual Order Search from Sidebar
+  const handleManualSearchOrder = (orderId: string) => {
+    addRecentSearch(orderId);
+    setCurrentOrderId(orderId);
+    handleSendMessage(`Please check the status and details for order ${orderId}.`);
+  };
+
+  // Handle Selection of Recent Search item
+  const handleSelectRecentOrder = (orderId: string, customPrompt?: string) => {
+    addRecentSearch(orderId);
+    setCurrentOrderId(orderId);
+    handleSendMessage(customPrompt || `Where is my order ${orderId}? Please check the tracking status.`);
   };
 
   // Human Supervisor Approval Response Handler
@@ -325,6 +399,12 @@ export default function App() {
               setAgentState(DEFAULT_INITIAL_STATE);
               setActiveDecisionNode('START');
             }}
+            recentSearches={recentSearches}
+            orders={orders}
+            shippingMap={shippingMap}
+            onSelectRecentOrder={handleSelectRecentOrder}
+            onClearRecentSearches={handleClearRecentSearches}
+            onManualSearchOrder={handleManualSearchOrder}
           />
         )}
 

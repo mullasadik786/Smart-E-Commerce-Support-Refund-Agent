@@ -24,6 +24,9 @@ Unlike conventional chatbots that hallucinate order details or trigger unvetted 
   - **Case A (`DELIVERED`)**: Rejects refund politely, provides carrier proof and timestamp, guides neighbor check or police theft report.
   - **Case B (`IN-TRANSIT` / `DELAYED`)**: Rejection of premature refund, provides live sorting hub location & revised ETA.
   - **Case C (`LOST` / `EXCEPTION`)**: Apologizes, prepares full refund, halts for supervisor sign-off.
+- **Recent Search Sidebar & Quick Order Lookup**:
+  - Automatically captures and stores the last 5 queried order IDs in local storage.
+  - One-click status checking, carrier status indicators, and direct quick-query shortcuts.
 - **Live State Variable Ledger**: Real-time observability of all 15 agent state nodes, memory flags, and execution traces.
 - **Interactive Sandbox & Carrier Simulator**: Modify database records and carrier physical statuses in real-time to test all decision branches.
 
