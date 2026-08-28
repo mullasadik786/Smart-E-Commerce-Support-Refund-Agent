@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #E4E3E0;
+  --surface: #FFFFFF;
+  --surface-alt: #ECEBE8;
+  --ink: #141414;
+  --line: #141414;
+  --line-light: rgba(20, 20, 20, 0.15);
+  --line-dashed: rgba(20, 20, 20, 0.35);
+  --accent-red: #FF4444;
+  --accent-green: #0F8246;
+  --accent-amber: #B45309;
+  --accent-blue: #1D4ED8;
+  --f-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', Courier, monospace;
+  --f-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --f-serif: Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Technical Dashboard Utility Styles */
+.section-label {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+.data-grid-border {
+  border: 1px solid var(--ink);
+}
+
+.data-grid-thick {
+  border: 2px solid var(--ink);
+}
+
+.carrier-status-callout {
+  font-family: var(--f-serif);
+  font-style: italic;
+  line-height: 1.1;
+  border-left: 6px solid var(--ink);
+  padding-left: 1rem;
+}
+
+/* Custom scrollbars for technical data grid */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-alt);
+  border-left: 1px solid var(--line-light);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-red);
+}
