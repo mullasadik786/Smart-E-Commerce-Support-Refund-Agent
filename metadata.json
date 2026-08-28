@@ -2,5 +2,7 @@
   "name": "Smart E-Commerce Support & Refund Agent",
   "description": "Autonomous, high-precision customer support and refund agent with sequential tool verification, decision tree matrix, and TrueForge human-in-the-loop approval harness.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
